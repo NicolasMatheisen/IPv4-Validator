@@ -28,7 +28,10 @@ jobs:
             madge \
             @mermaid-js/mermaid-cli
 
-      - name: Abhängigkeits­graph mit Madge generieren
+      - name: Statische Ordnerstruktur anlegen
+        run: mkdir -p docs/_static
+
+      - name: Abhängigkeitsgraph mit Madge generieren
         run: |
           npx madge \
             --extensions ts,js,jsx,tsx \
