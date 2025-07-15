@@ -35,7 +35,7 @@ jobs:
         run: |
           npx madge \
             --extensions ts,js,jsx,tsx \
-            --dot src > docs/_static/dependency-graph.dot
+            --dot src > docs/_static/dependency-graph.dot || true
 
       - name: Graph als SVG rendern
         run: |
