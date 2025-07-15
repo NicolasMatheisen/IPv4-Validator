@@ -1,0 +1,58 @@
+name: Automatische Dokumentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - name: Abhängigkeiten installieren
+        run: |
+          npm ci
+          npm install --save-dev \
+            typedoc \
+            typedoc-plugin-mermaid \
+            madge \
+            @mermaid-js/mermaid-cli
+
+      - name: Abhängigkeits­graph mit Madge generieren
+        run: |
+          npx madge \
+            --extensions ts,js,jsx,tsx \
+            --warning=false \
+            --dot src > docs/_static/dependency-graph.dot
+
+      - name: Graph als SVG rendern
+        run: |
+          npx mmdc \
+            -i docs/_static/dependency-graph.dot \
+            -o docs/_static/dependency-graph.svg
+
+      - name: TypeDoc Dokumentation erstellen
+        run: |
+          npx typedoc \
+            --out docs/build/html \
+            --plugin typedoc-plugin-mermaid \
+            --includeDeclarations \
+            --hideGenerator \
+            --theme default \
+            src
+
+      - name: Auf GitHub Pages deployen
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: docs/build/html
+          github_token: ${{ secrets.GITHUB_TOKEN }}
